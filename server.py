@@ -20,6 +20,7 @@ async def index(self):
         print("Incerrect TOKEN")
         return web.Response(status=500)
     post_data = await self.post()
+    print("POST:", post_data)
     ct_entry = CalltouchEntry(
         phone_number=post_data["phone"] if "phone" in post_data else "", 
         request_url=self.headers["Referer"],
