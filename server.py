@@ -4,7 +4,8 @@ import logging
 
 async def index(request):
     print("HEADERS:", request.headers)
-    print("COOKIES:", request.cookies)
+    post_data = await request.post()
+    print("POST:", post_data)
     return web.Response(text="Welcome home!")
 
 
