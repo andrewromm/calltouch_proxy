@@ -20,7 +20,7 @@ class CalltouchEntry():
 
 
 async def index(self):
-    if self.headers["token_ct"] != token:
+    if "token_ct" not in self.headers or self.headers["token_ct"] != token:
         print("Incerrect TOKEN")
         return web.Response(status=500)
     post_data = await self.post()
