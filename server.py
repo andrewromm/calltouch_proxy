@@ -3,12 +3,13 @@ import logging
 
 
 async def index(request):
-    print(request.headers)
+    print("HEADERS:", request.headers)
+    print("COOKIES:", request.cookies)
     return web.Response(text="Welcome home!")
 
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.ERROR)
     server = web.Application()
     server.router.add_post('/', index)
 
