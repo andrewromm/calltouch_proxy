@@ -41,6 +41,7 @@ async def index(request):
 async def push_to_calltouch(data, start):
     await start.wait()
     print("send", data.__dict__)
+    await asyncio.sleep(5)
 
 
 if __name__ == '__main__':
