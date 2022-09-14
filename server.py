@@ -1,9 +1,8 @@
-from urllib import request, response
 from aiohttp import web
+from aiojobs.aiohttp import setup, spawn
 import asyncio
 import logging
 import re
-from aiojobs import aiohttp
 
 
 token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJtZWRhbHZpYW4iLCJuYW1lIjoiRnVja1lvdSIsImlhdCI6MTUxNjIzOTAyMn0.0wgLveTkc5tbyjmwltvBDMy4XSyII5HCMnx0iKKRnbE"
@@ -28,18 +27,12 @@ async def index(request):
     session_id = re.search(r"_ct_session_id=\d*", post_data["COOKIES"]) if "COOKIES" in post_data else None
     ct_entry = CalltouchEntry(phone_number=post_data["phone"] if "phone" in post_data else "", request_url=request.headers["Referer"] if "Referer" in request.headers else "", session_id=session_id[0][15:] if session_id is not None else "", fio=post_data["name"] if "name" in post_data else "", email=post_data["email"] if "email" in post_data else "", comment=post_data["comments"] if "comments" in post_data else "")
 
-    start = asyncio.Event()
-    await aiohttp.spawn(request, push_to_calltouch(ct_entry, start))
-    response = web.Response(status=200)
-    await response.prepare(request)
-    await response.write_eof()
-    start.set()
+    await spawn(request, push_to_calltouch(ct_entry))
     
-    return response
+    return web.Response(status=200)
 
 
-async def push_to_calltouch(data, start):
-    await start.wait()
+async def push_to_calltouch(data):
     print("send", data.__dict__)
     await asyncio.sleep(5)
 
@@ -50,6 +43,7 @@ if __name__ == '__main__':
     server.router.add_post('/', index)
 
     web.run_app(server, path="127.0.0.1", port="8080")
+    setup(server)
 
 
 # async def my_web_app():
