@@ -1,5 +1,9 @@
+from urllib import request, response
 from aiohttp import web
+import aiojobs
+import asyncio
 import logging
+import re
 
 
 token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJtZWRhbHZpYW4iLCJuYW1lIjoiRnVja1lvdSIsImlhdCI6MTUxNjIzOTAyMn0.0wgLveTkc5tbyjmwltvBDMy4XSyII5HCMnx0iKKRnbE"
@@ -21,16 +25,22 @@ async def index(self):
         return web.Response(status=500)
     post_data = await self.post()
     print("POST:", post_data)
-    ct_entry = CalltouchEntry(
-        phone_number=post_data["phone"] if "phone" in post_data else "", 
-        request_url=self.headers["Referer"],
-        session_id=post_data["_ct_session_id"] if "_ct_session_id" in post_data else "",
-        fio=post_data["name"] if "name" in post_data else "",
-        email=post_data["email"] if "email" in post_data else "",
-        comment=post_data["comments"] if "comments" in post_data else ""
-    )
-    print("CT_ENTRY:", ct_entry.__dict__)
-    return web.Response(status=200)
+    session_id = re.search(r"_ct_session_id=\d*", post_data["COOKIES"])
+    ct_entry = CalltouchEntry(phone_number=post_data["phone"] if "phone" in post_data else "", request_url=self.headers["Referer"], session_id=session_id[0][15:] if session_id is not None else "", fio=post_data["name"] if "name" in post_data else "", email=post_data["email"] if "email" in post_data else "", comment=post_data["comments"] if "comments" in post_data else "")
+
+    start = asyncio.Event()
+    await aiojobs.aiohttp.spawn(request, push_to_calltouch(ct_entry, start))
+    response = web.Response(status=200)
+    await response.prepare(request)
+    await response.write_eof()
+    start.set()
+    
+    return response
+
+
+async def push_to_calltouch(data, start):
+    await start.wait()
+    print("send", data.__dict__)
 
 
 if __name__ == '__main__':
