@@ -1,9 +1,9 @@
 from urllib import request, response
 from aiohttp import web
-import aiojobs
 import asyncio
 import logging
 import re
+from aiojobs import aiohttp
 
 
 token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJtZWRhbHZpYW4iLCJuYW1lIjoiRnVja1lvdSIsImlhdCI6MTUxNjIzOTAyMn0.0wgLveTkc5tbyjmwltvBDMy4XSyII5HCMnx0iKKRnbE"
@@ -29,7 +29,7 @@ async def index(self):
     ct_entry = CalltouchEntry(phone_number=post_data["phone"] if "phone" in post_data else "", request_url=self.headers["Referer"], session_id=session_id[0][15:] if session_id is not None else "", fio=post_data["name"] if "name" in post_data else "", email=post_data["email"] if "email" in post_data else "", comment=post_data["comments"] if "comments" in post_data else "")
 
     start = asyncio.Event()
-    await aiojobs.aiohttp.spawn(request, push_to_calltouch(ct_entry, start))
+    await aiohttp.spawn(request, push_to_calltouch(ct_entry, start))
     response = web.Response(status=200)
     await response.prepare(request)
     await response.write_eof()
