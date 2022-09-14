@@ -42,8 +42,8 @@ if __name__ == '__main__':
     server = web.Application()
     server.router.add_post('/', index)
 
-    web.run_app(server, path="127.0.0.1", port="8080")
     setup(server)
+    web.run_app(server, path="127.0.0.1", port="8080")
 
 
 # async def my_web_app():
