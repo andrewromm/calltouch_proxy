@@ -19,14 +19,14 @@ class CalltouchEntry():
         self.sessionId = session_id 
 
 
-async def index(self):
-    if "token_ct" not in self.headers or self.headers["token_ct"] != token:
+async def index(request):
+    if "token_ct" not in request.headers or request.headers["token_ct"] != token:
         print("Incorrect TOKEN")
         return web.Response(status=500)
-    post_data = await self.post()
+    post_data = await request.post()
     print("POST:", post_data)
     session_id = re.search(r"_ct_session_id=\d*", post_data["COOKIES"]) if "COOKIES" in post_data else None
-    ct_entry = CalltouchEntry(phone_number=post_data["phone"] if "phone" in post_data else "", request_url=self.headers["Referer"] if "Referer" in self.headers else "", session_id=session_id[0][15:] if session_id is not None else "", fio=post_data["name"] if "name" in post_data else "", email=post_data["email"] if "email" in post_data else "", comment=post_data["comments"] if "comments" in post_data else "")
+    ct_entry = CalltouchEntry(phone_number=post_data["phone"] if "phone" in post_data else "", request_url=request.headers["Referer"] if "Referer" in request.headers else "", session_id=session_id[0][15:] if session_id is not None else "", fio=post_data["name"] if "name" in post_data else "", email=post_data["email"] if "email" in post_data else "", comment=post_data["comments"] if "comments" in post_data else "")
 
     start = asyncio.Event()
     await aiohttp.spawn(request, push_to_calltouch(ct_entry, start))
