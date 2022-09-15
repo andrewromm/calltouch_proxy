@@ -45,7 +45,7 @@ async def push_to_calltouch(ct_entry: CalltouchEntry):
             ) as resp:
                 print(resp.headers)
                 print(resp.status)
-                print(await resp.text())
+                print(await resp.json(encoding="utf8"))
 
 
 if __name__ == '__main__':
