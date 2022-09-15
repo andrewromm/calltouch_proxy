@@ -41,7 +41,7 @@ async def push_to_calltouch(ct_entry: CalltouchEntry):
         async with ClientSession() as session:
             async with session.post(
                 url=f"https://api.calltouch.ru/calls-service/RestAPI/requests/{CT_MEDALVIAN_ID}/register/",
-                json=ct_entry
+                json=ct_entry.__dict__
             ) as resp:
                 print(resp.status)
                 print(await resp.text())
