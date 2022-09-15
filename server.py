@@ -1,11 +1,13 @@
-from aiohttp import web
+import json
+from aiohttp import web, ClientSession
 from aiojobs.aiohttp import setup, spawn
 import asyncio
 import logging
 import re
 
 
-token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJtZWRhbHZpYW4iLCJuYW1lIjoiRnVja1lvdSIsImlhdCI6MTUxNjIzOTAyMn0.0wgLveTkc5tbyjmwltvBDMy4XSyII5HCMnx0iKKRnbE"
+TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJtZWRhbHZpYW4iLCJuYW1lIjoiRnVja1lvdSIsImlhdCI6MTUxNjIzOTAyMn0.0wgLveTkc5tbyjmwltvBDMy4XSyII5HCMnx0iKKRnbE"
+CT_MEDALVIAN_ID = "3295"
 
 class CalltouchEntry():
     def __init__(self, phone_number, request_url, session_id, fio="", email="", comment="") -> None:
@@ -19,7 +21,7 @@ class CalltouchEntry():
 
 
 async def index(request):
-    if "token_ct" not in request.headers or request.headers["token_ct"] != token:
+    if "token_ct" not in request.headers or request.headers["token_ct"] != TOKEN:
         print("Incorrect TOKEN")
         return web.Response(status=500)
     post_data = await request.post()
@@ -32,9 +34,17 @@ async def index(request):
     return web.Response(status=200)
 
 
-async def push_to_calltouch(data):
-    print("send", data.__dict__)
-    await asyncio.sleep(5)
+async def push_to_calltouch(ct_entry: CalltouchEntry):
+    print("send", ct_entry.__dict__)
+    if "medalvian.ru" in ct_entry.requestUrl:
+        # send to medalvian account in CT
+        async with ClientSession() as session:
+            async with session.post(
+                url=f"https://api.calltouch.ru/calls-service/RestAPI/requests/{CT_MEDALVIAN_ID}/register/",
+                json=ct_entry
+            ) as resp:
+                print(resp.status)
+                print(await resp.text())
 
 
 if __name__ == '__main__':
