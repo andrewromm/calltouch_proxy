@@ -43,6 +43,7 @@ async def push_to_calltouch(ct_entry: CalltouchEntry):
                 url=f"https://api.calltouch.ru/calls-service/RestAPI/requests/{CT_MEDALVIAN_ID}/register/",
                 json=ct_entry.__dict__
             ) as resp:
+                print(resp.headers)
                 print(resp.status)
                 print(await resp.text())
 
