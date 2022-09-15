@@ -50,7 +50,7 @@ async def push_to_calltouch(ct_entry: CalltouchEntry):
             ) as resp:
                 resp = await resp.json(encoding="utf8")
                 if "requestId" in resp:
-                    print(f"CT request was created at {resp.dateStr}, id {resp.requestId}")
+                    print(f'CT request was created at {resp["dateStr"]}, id {resp["requestId"]}')
 
 
 if __name__ == '__main__':
