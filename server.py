@@ -35,7 +35,7 @@ async def index(request):
     logger.debug(f"POST from {referer} headers: {request.headers}")
     logger.debug(f"POST from {referer} data: {post_data}")
 
-    if "token_ct" not in request.headers or request.headers["token_ct"] != TOKEN:
+    if "Token" not in request.headers or request.headers["Token"] != TOKEN:
         logger.error(f"Incorrect TOKEN from {referer}")
         return web.Response(status=500)
     
