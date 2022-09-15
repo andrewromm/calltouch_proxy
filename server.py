@@ -2,12 +2,19 @@ from aiohttp import web, ClientSession
 from aiojobs.aiohttp import setup, spawn
 import logging
 import re
+import os
 
+TOKEN = os.environ.get("TOKEN")
+CT_MEDALVIAN_ID = os.environ.get("CT_MEDALVIAN_ID")
+CT_CMZMEDICAL_ID = os.environ.get("CT_CMZMEDICAL_ID")
 
-TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJtZWRhbHZpYW4iLCJuYW1lIjoiRnVja1lvdSIsImlhdCI6MTUxNjIzOTAyMn0.0wgLveTkc5tbyjmwltvBDMy4XSyII5HCMnx0iKKRnbE"
-CT_MEDALVIAN_ID = "3295"
-CT_CMZMEDICAL_ID = "16474"
-logger = None
+logging.basicConfig(
+    filename="log.log",
+    filemode='a',
+    format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+    datefmt='%H:%M:%S',
+    level=logging.DEBUG)
+logger = logging.getLogger()
 
 class CalltouchEntry():
     def __init__(self, phone_number, request_url, session_id, fio="", email="", comment="") -> None:
@@ -57,23 +64,11 @@ async def push_to_calltouch(ct_entry: CalltouchEntry):
                     logger.debug(f'CT request was created at {resp["dateStr"]}, id {resp["requestId"]}')
 
 
-if __name__ == '__main__':
-    logging.basicConfig(
-        filename="log.log",
-        filemode='a',
-        format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
-        datefmt='%H:%M:%S',
-        level=logging.DEBUG)
-    logger = logging.getLogger()
 
+async def calltouch_proxy_app():
     server = web.Application()
     server.router.add_post('/', index)
 
     setup(server)
-    web.run_app(server, path="127.0.0.1", port="8080")
-
-
-# async def my_web_app():
-#     app = web.Application()
-#     app.router.add_post('/', index)
-#     return app
+    return server
+    # web.run_app(server, path="127.0.0.1", port="8080")
