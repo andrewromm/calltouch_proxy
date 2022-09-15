@@ -32,11 +32,13 @@ async def index(request):
     post_data = await request.post()
     referer = request.headers["Referer"] if "Referer" in request.headers else ""
     
+    logger.debug(f"POST from {referer} headers: {request.headers}")
+    logger.debug(f"POST from {referer} data: {post_data}")
+
     if "token_ct" not in request.headers or request.headers["token_ct"] != TOKEN:
         logger.error(f"Incorrect TOKEN from {referer}")
         return web.Response(status=500)
     
-    logger.debug(f"POST from {referer}: {post_data}")
     session_id = re.search(r"_ct_session_id=\d*", post_data["COOKIES"]) if "COOKIES" in post_data else None
     ct_entry = CalltouchEntry(phone_number=post_data["phone"] if "phone" in post_data else "", request_url=referer, session_id=session_id[0][15:] if session_id is not None else "", fio=post_data["name"] if "name" in post_data else "", email=post_data["email"] if "email" in post_data else "", comment=post_data["comments"] if "comments" in post_data else "")
 
