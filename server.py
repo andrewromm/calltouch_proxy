@@ -17,7 +17,8 @@ class CalltouchEntry():
         self.subject = "Заявка с сайта"
         self.comment = comment
         self.requestUrl = request_url
-        self.sessionId = session_id 
+        self.sessionId = session_id
+        self.subject = ""
 
 
 async def index(request):
@@ -37,13 +38,13 @@ async def index(request):
 async def push_to_calltouch(ct_entry: CalltouchEntry):
     print("send", ct_entry.__dict__)
     if "medalvian.ru" in ct_entry.requestUrl:
+        ct_entry.subject = "Заявка с сайта"
         # send to medalvian account in CT
         async with ClientSession() as session:
             async with session.post(
-                url=f"https://api.calltouch.ru/calls-service/RestAPI/requests/{CT_MEDALVIAN_ID}/register/",
+                url="https://webhook.site/bb91470b-634d-4eb5-8a39-00e0632e6407",#f"https://api.calltouch.ru/calls-service/RestAPI/requests/{CT_MEDALVIAN_ID}/register/",
                 json=ct_entry.__dict__
             ) as resp:
-                print(resp.headers)
                 print(resp.status)
                 print(await resp.json(encoding="utf8"))
 
