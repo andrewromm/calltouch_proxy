@@ -2,7 +2,6 @@ from aiohttp import web, ClientSession
 from aiojobs.aiohttp import setup, spawn
 import logging
 import re
-import json
 
 
 TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJtZWRhbHZpYW4iLCJuYW1lIjoiRnVja1lvdSIsImlhdCI6MTUxNjIzOTAyMn0.0wgLveTkc5tbyjmwltvBDMy4XSyII5HCMnx0iKKRnbE"
@@ -30,7 +29,7 @@ async def index(request):
         logger.error(f"Incorrect TOKEN from {referer}")
         return web.Response(status=500)
     
-    logger.debug(f"POST from {referer}: {json.dumps(post_data)}")
+    logger.debug(f"POST from {referer}: {post_data}")
     session_id = re.search(r"_ct_session_id=\d*", post_data["COOKIES"]) if "COOKIES" in post_data else None
     ct_entry = CalltouchEntry(phone_number=post_data["phone"] if "phone" in post_data else "", request_url=referer, session_id=session_id[0][15:] if session_id is not None else "", fio=post_data["name"] if "name" in post_data else "", email=post_data["email"] if "email" in post_data else "", comment=post_data["comments"] if "comments" in post_data else "")
 
