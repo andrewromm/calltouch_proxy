@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.3"
 
 services:
   calltouch_proxy:
@@ -28,7 +28,7 @@ services:
       - 443:443
       - 80:80
     depends_on:
-      - aviatxru
+      - calltouch_proxy
 
   nginx-proxy-letsencrypt:
     container_name: letsencrypt
