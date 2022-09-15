@@ -1,13 +1,12 @@
-import json
 from aiohttp import web, ClientSession
 from aiojobs.aiohttp import setup, spawn
-import asyncio
 import logging
 import re
 
 
 TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJtZWRhbHZpYW4iLCJuYW1lIjoiRnVja1lvdSIsImlhdCI6MTUxNjIzOTAyMn0.0wgLveTkc5tbyjmwltvBDMy4XSyII5HCMnx0iKKRnbE"
 CT_MEDALVIAN_ID = "3295"
+CT_CMZMEDICAL_ID = "16474"
 
 class CalltouchEntry():
     def __init__(self, phone_number, request_url, session_id, fio="", email="", comment="") -> None:
@@ -26,7 +25,7 @@ async def index(request):
         print("Incorrect TOKEN")
         return web.Response(status=500)
     post_data = await request.post()
-    print("POST:", post_data)
+    print("POST from site:", post_data)
     session_id = re.search(r"_ct_session_id=\d*", post_data["COOKIES"]) if "COOKIES" in post_data else None
     ct_entry = CalltouchEntry(phone_number=post_data["phone"] if "phone" in post_data else "", request_url=request.headers["Referer"] if "Referer" in request.headers else "", session_id=session_id[0][15:] if session_id is not None else "", fio=post_data["name"] if "name" in post_data else "", email=post_data["email"] if "email" in post_data else "", comment=post_data["comments"] if "comments" in post_data else "")
 
@@ -36,17 +35,22 @@ async def index(request):
 
 
 async def push_to_calltouch(ct_entry: CalltouchEntry):
-    print("send", ct_entry.__dict__)
+    url = None
     if "medalvian.ru" in ct_entry.requestUrl:
+        url = f"https://api.calltouch.ru/calls-service/RestAPI/requests/{CT_MEDALVIAN_ID}/register/"
+    elif "cmzmedical.ru" in ct_entry.requestUrl:
+        url = f"https://api.calltouch.ru/calls-service/RestAPI/requests/{CT_CMZMEDICAL_ID}/register/"
+
+    if url is not None:
         ct_entry.subject = "Заявка с сайта"
-        # send to medalvian account in CT
         async with ClientSession() as session:
             async with session.post(
-                url=f"https://api.calltouch.ru/calls-service/RestAPI/requests/{CT_MEDALVIAN_ID}/register/",
+                url=url,
                 data=ct_entry.__dict__
             ) as resp:
-                print(resp.status)
-                print(await resp.json(encoding="utf8"))
+                resp = await resp.json(encoding="utf8")
+                if "requestId" in resp:
+                    print(f"CT request was created at {resp.dateStr}, id {resp.requestId}")
 
 
 if __name__ == '__main__':
